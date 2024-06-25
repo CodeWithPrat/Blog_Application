@@ -13,11 +13,13 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
-import io.jsonwebtoken.SignatureException; // Import for SignatureException
+import io.jsonwebtoken.SignatureException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -28,13 +30,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Autowired
     private JwtTokenHelper jwtTokenHelper;
 
+    private static final Logger logger = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
         // 1. Get token from the Authorization header
         String requestToken = request.getHeader("Authorization");
-        System.out.println(requestToken);
+        logger.debug("Authorization Header: {}", requestToken);
 
         String username = null;
         String token = null;
@@ -46,16 +50,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 // Extract username from the token
                 username = jwtTokenHelper.getUsernameFromToken(token);
             } catch (IllegalArgumentException e) {
-                System.out.println("Unable to get JWT Token");
+                logger.error("Unable to get JWT Token", e);
             } catch (ExpiredJwtException e) {
-                System.out.println("JWT Token has expired");
+                logger.warn("JWT Token has expired", e);
             } catch (MalformedJwtException e) {
-                System.out.println("Invalid JWT Token");
+                logger.error("Invalid JWT Token", e);
             } catch (SignatureException e) { // Catching signature exception
-                System.out.println("JWT signature does not match locally computed signature");
+                logger.error("JWT signature does not match locally computed signature", e);
             }
         } else {
-            System.out.println("JWT token does not begin with Bearer");
+            logger.warn("JWT token does not begin with Bearer");
         }
 
         // 2. Once we get the token, validate it
@@ -73,13 +77,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 // Set the authentication in the security context
                 SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
             } else {
-                System.out.println("Invalid JWT token");
+                logger.warn("Invalid JWT token");
             }
         } else {
-            System.out.println("Username is null or context is not null");
+            logger.debug("Username is null or context is not null");
         }
 
         // Proceed with the next filter
         filterChain.doFilter(request, response);
-   }
+    }
 }

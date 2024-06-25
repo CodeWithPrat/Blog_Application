@@ -1,5 +1,10 @@
 package com.blog.payload;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import com.blog.entities.Role;
+
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Pattern;
@@ -30,4 +35,6 @@ public class UserDTO {
 
     @NotEmpty(message = "About section is required")
     private String about;
+    
+    private Set<RoleDTO>roles = new HashSet<>();
 }
