@@ -1,36 +1,36 @@
 package com.blog.security;
 
-import java.io.IOException;
+import java.io.IOException; // Exception thrown when an I/O operation fails or is interrupted
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
-import org.springframework.stereotype.Component;
-import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.beans.factory.annotation.Autowired; // Annotation for automatic dependency injection
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken; // Represents an authentication request using a username and password
+import org.springframework.security.core.context.SecurityContextHolder; // Holds the security context, which contains authentication and security information
+import org.springframework.security.core.userdetails.UserDetails; // Represents the user details
+import org.springframework.security.core.userdetails.UserDetailsService; // Service for retrieving user-related data
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource; // Contains additional details for authentication
+import org.springframework.stereotype.Component; // Indicates that an annotated class is a "component"
+import org.springframework.web.filter.OncePerRequestFilter; // Filter base class that guarantees a single execution per request dispatch
 
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.MalformedJwtException;
-import io.jsonwebtoken.SignatureException;
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import io.jsonwebtoken.ExpiredJwtException; // Exception thrown when a JWT token is expired
+import io.jsonwebtoken.MalformedJwtException; // Exception thrown when a JWT token is malformed
+import io.jsonwebtoken.SignatureException; // Exception thrown when a JWT signature does not match locally computed signature
+import jakarta.servlet.FilterChain; // Used to pass a request from one filter to the next in the chain
+import jakarta.servlet.ServletException; // Exception thrown when a servlet encounters difficulty
+import jakarta.servlet.http.HttpServletRequest; // Represents an HTTP request
+import jakarta.servlet.http.HttpServletResponse; // Represents an HTTP response
+import org.slf4j.Logger; // Logger for logging messages
+import org.slf4j.LoggerFactory; // Factory for creating loggers
 
-@Component
+@Component // Indicates that this class is a Spring component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    @Autowired
+    @Autowired // Automatically injects the UserDetailsService dependency
     private UserDetailsService userDetailsService;
 
-    @Autowired
+    @Autowired // Automatically injects the JwtTokenHelper dependency
     private JwtTokenHelper jwtTokenHelper;
 
-    private static final Logger logger = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
+    private static final Logger logger = LoggerFactory.getLogger(JwtAuthenticationFilter.class); // Logger for logging messages
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -49,16 +49,26 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             try {
                 // Extract username from the token
                 username = jwtTokenHelper.getUsernameFromToken(token);
-            } catch (IllegalArgumentException e) {
+            } 
+            catch (IllegalArgumentException e) 
+            {
                 logger.error("Unable to get JWT Token", e);
-            } catch (ExpiredJwtException e) {
+            } 
+            catch (ExpiredJwtException e) 
+            {
                 logger.warn("JWT Token has expired", e);
-            } catch (MalformedJwtException e) {
+            } 
+            catch (MalformedJwtException e) 
+            {
                 logger.error("Invalid JWT Token", e);
-            } catch (SignatureException e) { // Catching signature exception
+            } 
+            catch (SignatureException e) 
+            { // Catching signature exception
                 logger.error("JWT signature does not match locally computed signature", e);
             }
-        } else {
+        } 
+        else 
+        {
             logger.warn("JWT token does not begin with Bearer");
         }
 

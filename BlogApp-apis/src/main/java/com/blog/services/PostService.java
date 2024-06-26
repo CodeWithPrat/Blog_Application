@@ -1,35 +1,34 @@
 package com.blog.services;
 
-import java.util.List;
+import java.util.List; // Represents an ordered collection (also known as a sequence)
 
-
-
-import com.blog.payload.PostDTO;
-import com.blog.payload.PostResponse;
-import com.blog.repositories.PostRepo;
+import com.blog.payload.PostDTO; // DTO (Data Transfer Object) for post data
+import com.blog.payload.PostResponse; // Response object containing posts
+import com.blog.repositories.PostRepo; // Repository interface for Post entity
 
 public interface PostService {
-    // create
+    
+    // Create a new post
     PostDTO createPost(PostDTO postDTO, Integer userId, Integer categoryId);
     
-    // update
+    // Update an existing post
     PostDTO updatePost(PostDTO postDTO, Integer postId);
     
-    // delete
+    // Delete a post by its ID
     void deletePost(Integer postId);
     
-    // get all posts
+    // Retrieve all posts with pagination and sorting
     PostResponse getAllPost(Integer pageNumber, Integer pageSize, String sortby, String sortDirs);
     
-    // get single post
+    // Retrieve a single post by its ID
     PostDTO getPostById(Integer postId);
     
-    // get all posts by category
+    // Retrieve all posts belonging to a specific category
     List<PostDTO> getPostsByCategory(Integer categoryId);
     
-    // get all posts by user
+    // Retrieve all posts created by a specific user
     List<PostDTO> getPostsByUser(Integer userId);
     
-    // search posts
+    // Search posts based on a keyword
     List<PostDTO> searchPosts(String keyword);
 }

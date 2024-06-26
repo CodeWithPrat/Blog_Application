@@ -19,6 +19,7 @@ import com.blog.services.UserService;
 
 @Service
 public class UserServiceImpl implements UserService {
+    
     @Autowired
     private UserRepo userRepo;
 
@@ -31,59 +32,68 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private RoleRepo roleRepo;
 
+    // Create a new user
     @Override
     public UserDTO createUser(UserDTO userDTO) {
-        User user = this.dtoToUser(userDTO);
-        User savedUser = this.userRepo.save(user);
-        return this.userToDTO(savedUser);
+        User user = dtoToUser(userDTO); // Map UserDTO to User entity
+        User savedUser = userRepo.save(user); // Save user in the repository
+        return userToDTO(savedUser); // Map saved User entity back to UserDTO
     }
 
+    // Update an existing user
     @Override
     public UserDTO updateUser(UserDTO userDto, Integer userId) {
-        User user = this.userRepo.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User", "Id", userId));
-        user.setName(userDto.getName());
+        User user = userRepo.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "Id", userId)); // Find user by Id or throw exception if not found
+        user.setName(userDto.getName()); // Update user details
         user.setEmail(userDto.getEmail());
         user.setPassword(userDto.getPassword());
         user.setAbout(userDto.getAbout());
-        User updatedUser = this.userRepo.save(user);
-        return this.userToDTO(updatedUser);
+        User updatedUser = userRepo.save(user); // Save updated user
+        return userToDTO(updatedUser); // Map updated User entity to UserDTO
     }
 
+    // Get user by Id
     @Override
     public UserDTO getUserById(Integer userId) {
-        User user = this.userRepo.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User", "Id", userId));
-        return this.userToDTO(user);
+        User user = userRepo.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "Id", userId)); // Find user by Id or throw exception if not found
+        return userToDTO(user); // Map User entity to UserDTO
     }
 
+    // Get all users
     @Override
     public List<UserDTO> getAllUser() {
-        List<User> users = this.userRepo.findAll();
-        return users.stream().map(this::userToDTO).collect(Collectors.toList());
+        List<User> users = userRepo.findAll(); // Retrieve all users
+        return users.stream().map(this::userToDTO).collect(Collectors.toList()); // Map each User entity to UserDTO and collect into a list
     }
 
+    // Delete a user by Id
     @Override
     public void deleteUser(Integer userId) {
-        User user = this.userRepo.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User", "Id", userId));
-        this.userRepo.delete(user);
+        User user = userRepo.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "Id", userId)); // Find user by Id or throw exception if not found
+        userRepo.delete(user); // Delete user
     }
 
+    // Map UserDTO to User entity
     private User dtoToUser(UserDTO userDto) {
-        return this.modelMapper.map(userDto, User.class);
+        return modelMapper.map(userDto, User.class);
     }
 
+    // Map User entity to UserDTO
     private UserDTO userToDTO(User user) {
-        return this.modelMapper.map(user, UserDTO.class);
+        return modelMapper.map(user, UserDTO.class);
     }
 
-	@Override
-	public UserDTO registerNewUser(UserDTO userDto) {
-		User user = this.modelMapper.map(userDto, User.class);
-		//encoded the password
-		user.setPassword(this.passwordEncoder.encode(user.getPassword()));
-		//roles
-		Role role = this.roleRepo.findById(AppConstants.NORMAL_USER).get();
-		user.getRoles().add(role);
-		User savedUser = this.userRepo.save(user);
-		return this.modelMapper.map(savedUser, UserDTO.class);
-	}
+    // Register a new user with encoded password and default role
+    @Override
+    public UserDTO registerNewUser(UserDTO userDto) {
+        User user = modelMapper.map(userDto, User.class); // Map UserDTO to User entity
+        user.setPassword(passwordEncoder.encode(user.getPassword())); // Encode the password
+        Role role = roleRepo.findById(AppConstants.NORMAL_USER).orElseThrow(); // Retrieve default role or throw exception if not found
+        user.getRoles().add(role); // Assign default role to user
+        User savedUser = userRepo.save(user); // Save user in the repository
+        return modelMapper.map(savedUser, UserDTO.class); // Map saved User entity back to UserDTO
+    }
 }
